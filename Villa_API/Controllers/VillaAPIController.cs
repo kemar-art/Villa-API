@@ -13,10 +13,18 @@ namespace Villa_API.Controllers
     [ApiController]
     public class VillaAPIController : ControllerBase
     {
+        //private readonly ILogger<VillaAPIController> _logger;
+
+        public VillaAPIController(/*ILogger<VillaAPIController> logger*/)
+        {
+            //_logger = logger;
+        }
+
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult<IEnumerable<VillaDTO>> GetVillas()
         {
+            //_logger.LogInformation("Get All Villas");
             return Ok(VillaStore.villaList);
         }
 
@@ -28,6 +36,7 @@ namespace Villa_API.Controllers
         {
             if (id == 0)
             {
+                //_logger.LogError("Error getting Villa Id:" + id);
                 return BadRequest();
             }
 
