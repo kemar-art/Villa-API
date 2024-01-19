@@ -53,11 +53,11 @@ namespace Villa_API.Controllers
             return _response;
         }
 
-        [HttpGet("{id:int}", Name = "GetByIdVillaAsync")]
+        [HttpGet("{id:int}", Name = "GetVillaByIdAsync")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<APIResponse>> GetByIdVillaAsync(int id)
+        public async Task<ActionResult<APIResponse>> GetVillaByIdAsync(int id)
         {
             try
             {
@@ -116,7 +116,7 @@ namespace Villa_API.Controllers
                 await _villaRepository.CreateAsync(Villa);
                 _response.Result = _mapper.Map<VillaDTO>(Villa);
                 _response.StatusCode = HttpStatusCode.Created;
-                return CreatedAtRoute("CreateVilla", new { id = Villa.Id }, _response);
+                return CreatedAtRoute("GetVillaByIdAsync", new { id = Villa.Id }, _response);
             }
             catch (Exception ex)
             {
@@ -163,7 +163,8 @@ namespace Villa_API.Controllers
 
 
         [HttpPut("{id:int}", Name = "UpdateVillaAsync")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<APIResponse>> UpdateVillaAsync(int id, [FromBody] VillaUpdateDTO villaUpdateDTO)
         {
