@@ -1,0 +1,38 @@
+﻿@model IEnumerable<Villa_Web.Models.Dto.VillaDTO>
+<br />
+
+<di class="container p-4 broder" v>
+    <div class="row pb-2">
+        <div class="col">
+            <h1 class="text-primary">Villa List</h1>
+        </div>
+        <div class="col text-end pt-1">
+            <a asp-controller="Villa" asp-action="CreateVilla" class="btn btn-outline-success"><i class="bi bi-plus-square-fill"></i> Creat New Villa</a>
+        </div>
+    </div>
+    
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Occupancy</th>
+                <th>Price</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Name</td>
+                    <td>@item.Occupancy</td>
+                    <td>@((item.Rate).ToString("c"))</td>
+                    <td>
+                        <a asp-controller="Villa" asp-action="UpdateVilla" class="btn btn-warning"><i class="bi bi-pencil-square"></i></a>
+                        <a asp-controller="Villa" asp-action="DeleteVilla" class="btn btn-danger"><i class="bi bi-trash3"></i></a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</di>
