@@ -14,7 +14,8 @@ using Villa_API.Repository.IRepository;
 
 namespace Villa_API.Controllers
 {
-    [Route("api/[controller]")]
+    //[Route("api/[controller]")]
+    [Route("api/VillaAPI")]
     [ApiController]
     public class VillaAPIController : ControllerBase
     {
