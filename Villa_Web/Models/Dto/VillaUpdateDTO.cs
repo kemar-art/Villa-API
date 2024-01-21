@@ -15,7 +15,6 @@ namespace Villa_Web.Models.Dto
         public int Occupancy { get; set; }
         [Required]
         public int SqFt { get; set; }
-        [Required]
         public string ImageUrl { get; set; }
         public string Amenity { get; set; }
     }
