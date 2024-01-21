@@ -16,8 +16,4 @@
     <ProjectReference Include="..\Villa_Utility\Villa_Utility.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="MappingConfig\" />
-  </ItemGroup>
-
 </Project>
