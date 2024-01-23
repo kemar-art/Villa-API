@@ -11,10 +11,10 @@ namespace Villa_Web.Controllers
 {
     public class VillaController : Controller
     {
-        private readonly IVillaService _villaService;
+        private readonly IVillaNumberserviceService _villaService;
         private readonly IMapper _mapper;
 
-        public VillaController(IVillaService villaService, IMapper mapper)
+        public VillaController(IVillaNumberserviceService villaService, IMapper mapper)
         {
             _villaService = villaService;
             _mapper = mapper;
