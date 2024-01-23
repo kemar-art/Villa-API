@@ -36,7 +36,7 @@ namespace Villa_API.Controllers
         {
             try
             {
-                IEnumerable<VillaNumber> VillaNumbers = await _villaNumberRepository.GetAllAsync();
+                IEnumerable<VillaNumber> VillaNumbers = await _villaNumberRepository.GetAllAsync(includeProperties:"Villa");
                 _response.Result = _mapper.Map<List<VillaNumberDTO>>(VillaNumbers);
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);

@@ -13,7 +13,7 @@ namespace Villa_API.Models
 
         [ForeignKey("villa")]
         public int VillaId { get; set; }
-        public Villa villa { get; set; }
+        public Villa Villa { get; set; }
         
     }
 }

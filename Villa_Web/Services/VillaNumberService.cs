@@ -7,7 +7,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Villa_Web.Services
 {
-    public class VillaNumberService : BaseService, IVillaNumberserviceService
+    public class VillaNumberService : BaseService, IVillaNumberService
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private string villaUrl;

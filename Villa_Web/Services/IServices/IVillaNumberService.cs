@@ -2,7 +2,7 @@
 
 namespace Villa_Web.Services.IServices
 {
-    public interface IVillaNumberserviceService
+    public interface IVillaNumberService
     {
         Task<T> GetAllAsync<T>();
         Task<T> GetAsync<T>(int id);

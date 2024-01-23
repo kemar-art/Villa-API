@@ -14,6 +14,7 @@ namespace Villa_API.Repository
         public GenericRepository(ApplicationDbContext dbContext)
         {
             _dbContext = dbContext;
+            //_dbContext.VillaNumbers.Include(x => x.villa).ToList();
             _DbSet = _dbContext.Set<T>();
         }
         public async Task CreateAsync(T entity)
@@ -22,7 +23,7 @@ namespace Villa_API.Repository
             await SaveAsync();
         }
 
-        public async Task<T> GetAsync(Expression<Func<T, bool>> filter = null, bool tracked = true)
+        public async Task<T> GetAsync(Expression<Func<T, bool>> filter = null, bool tracked = true, string? includeProperties = null)
         {
             IQueryable<T> query = _DbSet;
 
@@ -36,16 +37,32 @@ namespace Villa_API.Repository
                 query = query.Where(filter);
             }
 
+            if (includeProperties != null)
+            {
+                foreach (var incloudeProp in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(incloudeProp);
+                }
+            }
+
             return await query.FirstOrDefaultAsync();
         }
 
-        public async Task<List<T>> GetAllAsync(Expression<Func<T, bool>>? filter = null)
+        public async Task<List<T>> GetAllAsync(Expression<Func<T, bool>>? filter = null, string? includeProperties = null)
         {
             IQueryable<T> query = _DbSet;
 
             if (filter != null)
             {
                 query = query.Where(filter);
+            }
+
+            if (includeProperties != null)
+            {
+                foreach (var incloudeProp in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(incloudeProp);
+                }
             }
 
             return await query.ToListAsync();
