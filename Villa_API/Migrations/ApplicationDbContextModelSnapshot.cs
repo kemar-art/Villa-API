@@ -66,7 +66,7 @@ namespace Villa_API.Migrations
                         {
                             Id = 1,
                             Amenity = "",
-                            CreatedDate = new DateTime(2024, 1, 21, 14, 25, 0, 808, DateTimeKind.Local).AddTicks(2249),
+                            CreatedDate = new DateTime(2024, 1, 23, 21, 5, 39, 996, DateTimeKind.Local).AddTicks(3082),
                             Details = "Fusce 11 tincidunt maximus leo, sed scelerisque massa auctor sit amet. Donec ex mauris, hendrerit quis nibh ac, efficitur fringilla enim.",
                             ImageUrl = "https://dotnetmastery.com/bluevillaimages/villa3.jpg",
                             Name = "Royal Villa",
@@ -79,7 +79,7 @@ namespace Villa_API.Migrations
                         {
                             Id = 2,
                             Amenity = "",
-                            CreatedDate = new DateTime(2024, 1, 21, 14, 25, 0, 808, DateTimeKind.Local).AddTicks(2262),
+                            CreatedDate = new DateTime(2024, 1, 23, 21, 5, 39, 996, DateTimeKind.Local).AddTicks(3092),
                             Details = "Fusce 11 tincidunt maximus leo, sed scelerisque massa auctor sit amet. Donec ex mauris, hendrerit quis nibh ac, efficitur fringilla enim.",
                             ImageUrl = "https://dotnetmastery.com/bluevillaimages/villa1.jpg",
                             Name = "Premium Pool Villa",
@@ -92,7 +92,7 @@ namespace Villa_API.Migrations
                         {
                             Id = 3,
                             Amenity = "",
-                            CreatedDate = new DateTime(2024, 1, 21, 14, 25, 0, 808, DateTimeKind.Local).AddTicks(2264),
+                            CreatedDate = new DateTime(2024, 1, 23, 21, 5, 39, 996, DateTimeKind.Local).AddTicks(3093),
                             Details = "Fusce 11 tincidunt maximus leo, sed scelerisque massa auctor sit amet. Donec ex mauris, hendrerit quis nibh ac, efficitur fringilla enim.",
                             ImageUrl = "https://dotnetmastery.com/bluevillaimages/villa4.jpg",
                             Name = "Luxury Pool Villa",
@@ -105,7 +105,7 @@ namespace Villa_API.Migrations
                         {
                             Id = 4,
                             Amenity = "",
-                            CreatedDate = new DateTime(2024, 1, 21, 14, 25, 0, 808, DateTimeKind.Local).AddTicks(2265),
+                            CreatedDate = new DateTime(2024, 1, 23, 21, 5, 39, 996, DateTimeKind.Local).AddTicks(3095),
                             Details = "Fusce 11 tincidunt maximus leo, sed scelerisque massa auctor sit amet. Donec ex mauris, hendrerit quis nibh ac, efficitur fringilla enim.",
                             ImageUrl = "https://dotnetmastery.com/bluevillaimages/villa5.jpg",
                             Name = "Diamond Villa",
@@ -118,7 +118,7 @@ namespace Villa_API.Migrations
                         {
                             Id = 5,
                             Amenity = "",
-                            CreatedDate = new DateTime(2024, 1, 21, 14, 25, 0, 808, DateTimeKind.Local).AddTicks(2267),
+                            CreatedDate = new DateTime(2024, 1, 23, 21, 5, 39, 996, DateTimeKind.Local).AddTicks(3096),
                             Details = "Fusce 11 tincidunt maximus leo, sed scelerisque massa auctor sit amet. Donec ex mauris, hendrerit quis nibh ac, efficitur fringilla enim.",
                             ImageUrl = "https://dotnetmastery.com/bluevillaimages/villa2.jpg",
                             Name = "Diamond Pool Villa",
@@ -155,13 +155,13 @@ namespace Villa_API.Migrations
 
             modelBuilder.Entity("Villa_API.Models.VillaNumber", b =>
                 {
-                    b.HasOne("Villa_API.Models.Villa", "villa")
+                    b.HasOne("Villa_API.Models.Villa", "Villa")
                         .WithMany()
                         .HasForeignKey("VillaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("villa");
+                    b.Navigation("Villa");
                 });
 #pragma warning restore 612, 618
         }

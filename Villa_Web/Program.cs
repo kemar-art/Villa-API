@@ -9,8 +9,8 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddAutoMapper(typeof(MapConfig));
 
-builder.Services.AddHttpClient<IVillaserviceService, VillaService>();
-builder.Services.AddScoped<IVillaserviceService, VillaService>();  
+builder.Services.AddHttpClient<IVillaService, VillaService>();
+builder.Services.AddScoped<IVillaService, VillaService>();  
 
 builder.Services.AddHttpClient<IVillaNumberService, VillaNumberService>();
 builder.Services.AddScoped<IVillaNumberService, VillaNumberService>(); 
