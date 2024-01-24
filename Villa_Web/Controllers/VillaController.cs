@@ -11,10 +11,10 @@ namespace Villa_Web.Controllers
 {
     public class VillaController : Controller
     {
-        private readonly IVillaNumberService _villaService;
+        private readonly IVillaService _villaService;
         private readonly IMapper _mapper;
 
-        public VillaController(IVillaNumberService villaService, IMapper mapper)
+        public VillaController(IVillaService villaService, IMapper mapper)
         {
             _villaService = villaService;
             _mapper = mapper;
@@ -39,7 +39,7 @@ namespace Villa_Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateVilla(VillaNumberCreateDTO model)
+        public async Task<IActionResult> CreateVilla(VillaCreateDTO model)
         {
             if (ModelState.IsValid) 
             {
@@ -67,7 +67,7 @@ namespace Villa_Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateVilla(VillaNumberUpdateDTO model)
+        public async Task<IActionResult> UpdateVilla(VillaUpdateDTO model)
         {
             if (ModelState.IsValid)
             {
@@ -95,9 +95,9 @@ namespace Villa_Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteVilla(VillaNumberDTO model)
+        public async Task<IActionResult> DeleteVilla(VillaDTO model)
         {
-                var response = await _villaService.DeleteAsync<APIResponse>(model.VillaNo);
+                var response = await _villaService.DeleteAsync<APIResponse>(model.Id);
                 if (response != null && response.IsSuccess)
                 {
                     return RedirectToAction(nameof(IndexVilla));
