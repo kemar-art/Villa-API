@@ -99,7 +99,7 @@ namespace Villa_API.Controllers
             {
                 if (await _villaRepository.GetAsync(v => v.Name.ToLower() == villaCreateDTO.Name.ToLower()) != null)
                 {
-                    ModelState.AddModelError(villaCreateDTO.Name, "Villa Already Exists!");
+                    ModelState.AddModelError("ErrorsMessages", "Villa Already Exists!");
                     return BadRequest(ModelState);
                 }
 

@@ -41,7 +41,7 @@ namespace Villa_Web.Controllers
         {
             VillaNumberCreateVM villaNumberCreateVM = new();
             var response = await _villaService.GetAllAsync<APIResponse>();
-            if (response != null && response.IsSuccess)
+            if (response != null && response.IsSuccess /*&& response.ErrorsMessages.Count == 0*/)
             {
                 villaNumberCreateVM.VillaSelectList = JsonConvert.DeserializeObject<List<VillaDTO>>(Convert.ToString(response.Result)).Select(x => new SelectListItem
                 {
@@ -63,8 +63,25 @@ namespace Villa_Web.Controllers
                 {
                     return RedirectToAction(nameof(IndexVillaNumber));
                 }
+                else
+                {
+                    if (response.ErrorsMessages.Count > 0)
+                    {
+                        ModelState.AddModelError("ErrorMessages", response.ErrorsMessages.FirstOrDefault());
+                    }
+                }
             }
 
+
+            var resp = await _villaService.GetAllAsync<APIResponse>();
+            if (resp != null && resp.IsSuccess /*&& response.ErrorsMessages.Count == 0*/)
+            {
+                model.VillaSelectList = JsonConvert.DeserializeObject<List<VillaDTO>>(Convert.ToString(resp.Result)).Select(x => new SelectListItem
+                {
+                    Text = x.Name,
+                    Value = x.Id.ToString(),
+                });
+            }
             return View(model);
         }
 

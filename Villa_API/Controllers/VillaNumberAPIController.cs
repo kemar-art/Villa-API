@@ -97,13 +97,13 @@ namespace Villa_API.Controllers
             {
                 if (await _villaNumberRepository.GetAsync(x => x.VillaNo == villaNumberCreateDTO.VillaNo) != null)
                 {
-                    ModelState.AddModelError(villaNumberCreateDTO.VillaNo.ToString(), "The Room Number Already Exists!");
+                    ModelState.AddModelError("ErrorsMessages", "The Room Number Already Exists!");
                     return BadRequest(ModelState);
                 }
 
                 if (await _villaRepository.GetAsync(x => x.Id == villaNumberCreateDTO.VillaId) == null)
                 {
-                    ModelState.AddModelError(villaNumberCreateDTO.VillaId.ToString(), "Villa ID is Invaliid!");
+                    ModelState.AddModelError("ErrorsMessages", "Villa ID is Invaliid!");
                     return BadRequest(ModelState);
                 }
 
@@ -177,7 +177,7 @@ namespace Villa_API.Controllers
 
                 if (await _villaRepository.GetAsync(x => x.Id == villaNumberUpdateDTO.VillaId) == null)
                 {
-                    ModelState.AddModelError(villaNumberUpdateDTO.VillaId.ToString(), "Villa ID is Invaliid!");
+                    ModelState.AddModelError("ErrorsMessages", "Villa ID is Invaliid!");
                     return BadRequest(ModelState);
                 }
 
