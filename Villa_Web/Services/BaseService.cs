@@ -18,7 +18,7 @@ namespace Villa_Web.Services
 
         public BaseService(IHttpClientFactory httpClientFactory)
         {
-            responseModel = new();
+            this.responseModel = new();
             _httpClientFactory = httpClientFactory;
         }
 
