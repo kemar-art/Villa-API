@@ -24,7 +24,7 @@ namespace Villa_Web.Services
             {
                 ApiType = StaticDetails.ApiType.POST,
                 Data = createDTO,
-                Url = villaUrl + "/api/"
+                Url = villaUrl + "/api/VillaAPI"
             });
         }
 
