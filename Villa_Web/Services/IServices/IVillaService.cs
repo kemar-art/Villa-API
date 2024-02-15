@@ -2,12 +2,12 @@
 
 namespace Villa_Web.Services.IServices
 {
-    public interface IVillaNumberService
+    public interface IVillaService
     {
         Task<T> GetAllAsync<T>(string token);
         Task<T> GetAsync<T>(int id, string token);
-        Task<T> CreateAsync<T>(VillaNumberCreateDTO createDTO, string token);
-        Task<T> UpdateAsync<T>(VillaNumberUpdateDTO updateDTO, string token);
+        Task<T> CreateAsync<T>(VillaCreateDTO createDTO, string token);
+        Task<T> UpdateAsync<T>(VillaUpdateDTO updateDTO, string token);
         Task<T> DeleteAsync<T>(int id, string token);
     }
 }

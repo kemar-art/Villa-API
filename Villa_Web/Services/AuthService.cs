@@ -17,12 +17,12 @@ namespace Villa_Web.Services
             _httpClientFactory = httpClientFactory;
             villaUrl = configuration.GetValue<string>("ServiceUrls:VillaAPI");
         }
-        public Task<T> LoginAsync<T>(LoginResponseDTO responseDTO)
+        public Task<T> LoginAsync<T>(LoginRequestDTO requestDTO)
         {
             return SendAsync<T>(new APIRequest()
             {
                 ApiType = StaticDetails.ApiType.POST,
-                Data = responseDTO,
+                Data = requestDTO,
                 Url = villaUrl + "/api/UserAuth/login"
             });
         }
