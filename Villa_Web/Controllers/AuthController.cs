@@ -31,8 +31,8 @@ namespace Villa_Web.Controllers
         [HttpGet]
         public IActionResult Register()
         {
-            LoginRequestDTO loginRequestDTO = new();
-            return View(loginRequestDTO);
+            RegisterationRequestDTO requestDTO = new();
+            return View(requestDTO);
         }
 
         [HttpPost]
