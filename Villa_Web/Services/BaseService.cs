@@ -67,7 +67,7 @@ namespace Villa_Web.Services
                 try
                 {
                     APIResponse APIResponse = JsonConvert.DeserializeObject<APIResponse>(apiContent);
-                    if (apiResponse.StatusCode == System.Net.HttpStatusCode.BadRequest || apiResponse.StatusCode == System.Net.HttpStatusCode.NotFound)
+                    if (APIResponse != null && (apiResponse.StatusCode == System.Net.HttpStatusCode.BadRequest || apiResponse.StatusCode == System.Net.HttpStatusCode.NotFound))
                     {
                         APIResponse.StatusCode = System.Net.HttpStatusCode.BadRequest;
                         APIResponse.IsSuccess = false;

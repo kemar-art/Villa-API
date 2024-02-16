@@ -12,10 +12,11 @@ using Villa_API.Models.Dto;
 using Villa_API.Repository;
 using Villa_API.Repository.IRepository;
 
-namespace Villa_API.Controllers
+namespace Villa_API.Controllers.V1
 {
-    [Route("api/VillaNumberAPI")]
+    [Route("api/v{version:apiVersion}/VillaNumberAPI")]
     [ApiController]
+    [ApiVersion("1.0")]
     public class VillaNumberAPIController : ControllerBase
     {
         protected APIResponse _response;
@@ -32,12 +33,13 @@ namespace Villa_API.Controllers
         }
 
         [HttpGet]
+        //[MapToApiVersion("1.0")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<APIResponse>> GetAllVillaNumbersAsync()
         {
             try
             {
-                IEnumerable<VillaNumber> VillaNumbers = await _villaNumberRepository.GetAllAsync(includeProperties:"Villa");
+                IEnumerable<VillaNumber> VillaNumbers = await _villaNumberRepository.GetAllAsync(includeProperties: "Villa");
                 _response.Result = _mapper.Map<List<VillaNumberDTO>>(VillaNumbers);
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);
@@ -87,7 +89,7 @@ namespace Villa_API.Controllers
 
             return _response;
         }
-        
+
 
         [HttpPost]
         [Authorize(Roles = "admin")]

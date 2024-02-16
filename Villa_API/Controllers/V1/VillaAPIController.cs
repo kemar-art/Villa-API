@@ -13,10 +13,11 @@ using Villa_API.Models;
 using Villa_API.Models.Dto;
 using Villa_API.Repository.IRepository;
 
-namespace Villa_API.Controllers
+namespace Villa_API.Controllers.V1
 {
     //[Route("api/[controller]")]
-    [Route("api/VillaAPI")]
+    [Route("api/v{version:apiVersion}/VillaAPI")]
+    [ApiVersion("1.0")]
     [ApiController]
     public class VillaAPIController : ControllerBase
     {
@@ -96,7 +97,7 @@ namespace Villa_API.Controllers
         }
 
         [HttpPost]
-        
+
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -207,7 +208,7 @@ namespace Villa_API.Controllers
 
 
         }
-  
+
     }
 }
 
