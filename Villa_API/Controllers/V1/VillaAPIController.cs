@@ -41,12 +41,21 @@ namespace Villa_API.Controllers.V1
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<APIResponse>> GetAllVillasAsync()
+        public async Task<ActionResult<APIResponse>> GetAllVillasAsync([FromQuery(Name = "filterOccupancy")] int? occupancy)
         {
             try
             {
                 //_logger.LogInformation("Get All Villas");
-                IEnumerable<Villa> villaList = await _villaRepository.GetAllAsync();
+                IEnumerable<Villa> villaList;
+                if (occupancy > 0)
+                {
+                    villaList = await _villaRepository.GetAllAsync(o => o.Occupancy == occupancy);
+                }
+                else
+                {
+                    villaList = await _villaRepository.GetAllAsync();
+                }
+                
                 _response.Result = _mapper.Map<List<VillaDTO>>(villaList);
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);
