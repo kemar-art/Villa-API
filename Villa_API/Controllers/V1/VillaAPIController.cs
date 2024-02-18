@@ -36,6 +36,8 @@ namespace Villa_API.Controllers.V1
         }
 
         [HttpGet]
+        [ResponseCache(CacheProfileName = "Default30")]
+        //[ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -59,6 +61,7 @@ namespace Villa_API.Controllers.V1
         }
 
         [HttpGet("{id:int}", Name = "GetVillaByIdAsync")]
+        [ResponseCache(Duration = 30)]
         [Authorize(Roles = "admin")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
