@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.IdentityModel.Tokens;
 using System.Net;
 using System.Xml.Linq;
 using Villa_API.Data;
@@ -41,7 +42,7 @@ namespace Villa_API.Controllers.V1
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<APIResponse>> GetAllVillasAsync([FromQuery(Name = "filterOccupancy")] int? occupancy)
+        public async Task<ActionResult<APIResponse>> GetAllVillasAsync([FromQuery(Name = "filterOccupancy")] int? occupancy, [FromQuery] string? search)
         {
             try
             {
@@ -54,6 +55,11 @@ namespace Villa_API.Controllers.V1
                 else
                 {
                     villaList = await _villaRepository.GetAllAsync();
+                }
+
+                if (!string.IsNullOrEmpty(search))
+                {
+                    villaList = villaList.Where(o => o.Name.ToLower().Contains(search));
                 }
                 
                 _response.Result = _mapper.Map<List<VillaDTO>>(villaList);
