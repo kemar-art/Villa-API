@@ -47,7 +47,7 @@ namespace Villa_API.Controllers.V1
             catch (Exception ex)
             {
                 _response.IsSuccess = false;
-                _response.ErrorsMessages = [ex.Message];
+                _response.ErrorsMessages = new List<string>() { ex.ToString() };
             }
 
             return _response;
@@ -84,7 +84,7 @@ namespace Villa_API.Controllers.V1
             catch (Exception ex)
             {
                 _response.IsSuccess = false;
-                _response.ErrorsMessages = [ex.Message];
+                _response.ErrorsMessages = new List<string>() { ex.ToString() };
             }
 
             return _response;
@@ -127,7 +127,7 @@ namespace Villa_API.Controllers.V1
             catch (Exception ex)
             {
                 _response.IsSuccess = false;
-                _response.ErrorsMessages = [ex.Message];
+                _response.ErrorsMessages = new List<string>() { ex.ToString() };
             }
 
             return _response;
@@ -162,7 +162,7 @@ namespace Villa_API.Controllers.V1
             catch (Exception ex)
             {
                 _response.IsSuccess = false;
-                _response.ErrorsMessages = [ex.Message];
+                _response.ErrorsMessages = new List<string>() { ex.ToString() };
             }
 
             return _response;
@@ -199,7 +199,7 @@ namespace Villa_API.Controllers.V1
             catch (Exception ex)
             {
                 _response.IsSuccess = false;
-                _response.ErrorsMessages = [ex.Message];
+                _response.ErrorsMessages = new List<string>() { ex.ToString() };
             }
 
             return _response;
