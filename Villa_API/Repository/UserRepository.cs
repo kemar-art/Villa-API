@@ -77,20 +77,34 @@ namespace Villa_API.Repository
             return loginResponseDTO;
         }
 
-        public async Task<LocalUser> Register(RegisterationRequestDTO registerationRequestDTO)
+        public async Task<UserDTO> Register(RegisterationRequestDTO registerationRequestDTO)
         {
-            LocalUser user = new()
+            ApplicationUser user = new()
             {
                 Name = registerationRequestDTO.Name,
-                Password = registerationRequestDTO.Password,
+                Email = registerationRequestDTO.UserName,
+                NormalizedEmail = registerationRequestDTO.UserName.ToUpper(),
                 UserName = registerationRequestDTO.UserName,
-                Role = registerationRequestDTO.Role,
             };
 
-            _dbContext.LocalUsers.Add(user);
-            await _dbContext.SaveChangesAsync();
-            user.Password = "";
-            return user;
+            try
+            {
+                var result = await _userManager.CreateAsync(user, registerationRequestDTO.Password);
+                if (result.Succeeded) 
+                {
+                    await _userManager.AddToRoleAsync(user, "admin");
+                    
+                    var userToReturn = _dbContext.ApplicationUsers.FirstOrDefault(u => u.UserName == registerationRequestDTO.UserName);
+                    return _mapper.Map<UserDTO>(userToReturn);
+                }
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+
+            return new UserDTO();
         }
     }
 }
