@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Villa_Utility;
 using Villa_Web.Models;
@@ -14,7 +15,7 @@ namespace Villa_Web.Controllers
     {
         private readonly IAuthService _authService;
 
-        public AuthController(IAuthService authService) 
+        public AuthController(IAuthService authService)
         {
             _authService = authService;
         }
@@ -36,16 +37,15 @@ namespace Villa_Web.Controllers
                 LoginResponseDTO model = JsonConvert.DeserializeObject<LoginResponseDTO>(Convert.ToString(aPIResponse.Result));
 
 
-                //var handler = new JwtSecurityTokenHandler();
-                //var jwt = handler.ReadJwtToken(model.Token);
+                var handler = new JwtSecurityTokenHandler();
+                var jwt = handler.ReadJwtToken(model.Token);
 
                 var identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
-                //identity.AddClaim(new Claim(ClaimTypes.Name, jwt.Claims.FirstOrDefault(u => u.Type == "name").Value));
-                //identity.AddClaim(new Claim(ClaimTypes.Role, jwt.Claims.FirstOrDefault(u => u.Type == "role").Value));
-                identity.AddClaim(new Claim(ClaimTypes.Name, model.User.UserName));
-                identity.AddClaim(new Claim(ClaimTypes.Role, model.User.Role));
+                identity.AddClaim(new Claim(ClaimTypes.Name, jwt.Claims.FirstOrDefault(u => u.Type == "unique_name").Value));
+                identity.AddClaim(new Claim(ClaimTypes.Role, jwt.Claims.FirstOrDefault(u => u.Type == "role").Value));
                 var principal = new ClaimsPrincipal(identity);
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
 
 
 
@@ -72,8 +72,8 @@ namespace Villa_Web.Controllers
         public async Task<IActionResult> Register(RegisterationRequestDTO requestDTO)
         {
             APIResponse response = await _authService.RegisterAsync<APIResponse>(requestDTO);
-            if (response != null && response.IsSuccess) 
-            { 
+            if (response != null && response.IsSuccess)
+            {
                 return RedirectToAction("Login");
             }
             return View();
