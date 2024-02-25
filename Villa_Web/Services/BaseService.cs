@@ -37,21 +37,29 @@ namespace Villa_Web.Services
                         Encoding.UTF8, "application/json");
                 }
 
-                switch (apiRequest.ApiType)
+                message.Method = apiRequest.ApiType switch
                 {
-                    case StaticDetails.ApiType.POST:
-                        message.Method = HttpMethod.Post;
-                        break;
-                    case StaticDetails.ApiType.PUT:
-                        message.Method = HttpMethod.Put;
-                        break;
-                    case StaticDetails.ApiType.DELETE:
-                        message.Method = HttpMethod.Delete;
-                        break;
-                    default:
-                        message.Method = HttpMethod.Get;
-                        break;
-                }
+                    StaticDetails.ApiType.POST => HttpMethod.Post,
+                    StaticDetails.ApiType.PUT => HttpMethod.Put,
+                    StaticDetails.ApiType.DELETE => HttpMethod.Delete,
+                    _ => HttpMethod.Get,
+                };
+
+                //switch (apiRequest.ApiType)
+                //{
+                //    case StaticDetails.ApiType.POST:
+                //        message.Method = HttpMethod.Post;
+                //        break;
+                //    case StaticDetails.ApiType.PUT:
+                //        message.Method = HttpMethod.Put;
+                //        break;
+                //    case StaticDetails.ApiType.DELETE:
+                //        message.Method = HttpMethod.Delete;
+                //        break;
+                //    default:
+                //        message.Method = HttpMethod.Get;
+                //        break;
+                //}
 
                 HttpResponseMessage apiResponse = null;
 

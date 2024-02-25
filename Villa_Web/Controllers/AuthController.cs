@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -63,19 +65,37 @@ namespace Villa_Web.Controllers
         [HttpGet]
         public IActionResult Register()
         {
-            RegisterationRequestDTO requestDTO = new();
-            return View(requestDTO);
+            var roleList = new List<SelectListItem>()
+            {
+                new (){Text = StaticDetails.Admin, Value = StaticDetails.Admin},
+                new (){Text = StaticDetails.Customer, Value = StaticDetails.Customer}
+            };
+            ViewBag.RoleList = roleList;
+            //RegisterationRequestDTO requestDTO = new();
+            return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterationRequestDTO requestDTO)
         {
+            if (string.IsNullOrEmpty(requestDTO.Role))
+            {
+                requestDTO.Role = StaticDetails.Customer;
+            }
             APIResponse response = await _authService.RegisterAsync<APIResponse>(requestDTO);
             if (response != null && response.IsSuccess)
             {
                 return RedirectToAction("Login");
             }
+
+            var roleList = new List<SelectListItem>()
+            {
+                new (){Text = StaticDetails.Admin, Value = StaticDetails.Admin},
+                new (){Text = StaticDetails.Customer, Value = StaticDetails.Customer}
+            };
+            ViewBag.RoleList = roleList;
+
             return View();
         }
 

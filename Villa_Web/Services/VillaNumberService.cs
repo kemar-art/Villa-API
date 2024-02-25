@@ -24,7 +24,7 @@ namespace Villa_Web.Services
             {
                 ApiType = StaticDetails.ApiType.POST,
                 Data = createDTO,
-                Url = villaUrl + "/api/v1/VillaNumberAPI",
+                Url = villaUrl + $"/api/{StaticDetails.CurrentAPIVersion}/VillaNumberAPI",
                 Token = token
             });
         }
@@ -34,7 +34,7 @@ namespace Villa_Web.Services
             return SendAsync<T>(new APIRequest()
             {
                 ApiType = StaticDetails.ApiType.DELETE,
-                Url = villaUrl + "/api/v1/VillaNumberAPI/" + id,
+                Url = villaUrl + $"/api/{StaticDetails.CurrentAPIVersion}/VillaNumberAPI/" + id,
                 Token = token
             });
         }
@@ -44,7 +44,7 @@ namespace Villa_Web.Services
             return SendAsync<T>(new APIRequest()
             {
                 ApiType = StaticDetails.ApiType.GET,
-                Url = villaUrl + "/api/v1/VillaNumberAPI",
+                Url = villaUrl + $"/api/{StaticDetails.CurrentAPIVersion}/VillaNumberAPI",
                 Token = token
             });
         }
@@ -54,7 +54,7 @@ namespace Villa_Web.Services
             return SendAsync<T>(new APIRequest()
             {
                 ApiType = StaticDetails.ApiType.GET,
-                Url = villaUrl + "/api/v1/VillaNumberAPI/" + id,
+                Url = villaUrl + $"/api/{StaticDetails.CurrentAPIVersion}/VillaNumberAPI/" + id,
                 Token = token
             });
         }
@@ -65,7 +65,7 @@ namespace Villa_Web.Services
             {
                 ApiType = StaticDetails.ApiType.PUT,
                 Data = updateDTO,
-                Url = villaUrl + "/api/v1/VillaNumberAPI/" + updateDTO.VillaNo,
+                Url = villaUrl + $"/api/{StaticDetails.CurrentAPIVersion}/VillaNumberAPI/" + updateDTO.VillaNo,
                 Token = token
             }); ;
         }
