@@ -28,13 +28,47 @@ namespace Villa_Web.Services
             {
                 var client = _httpClientFactory.CreateClient("VillaAPI");
                 HttpRequestMessage message = new();
-                message.Headers.Add("Accept", "application/json");
+                if (apiRequest.ContentType == StaticDetails.ContentType.MultipartFormData)
+                {
+                    message.Headers.Add("Accept", "*/*");
+                }
+                else
+                {
+                    message.Headers.Add("Accept", "application/json");
+                }
+                
                 message.RequestUri = new Uri(apiRequest.Url);
 
-                if (apiRequest.Data != null)
+                if (apiRequest.ContentType == StaticDetails.ContentType.MultipartFormData)
                 {
-                    message.Content = new StringContent(JsonConvert.SerializeObject(apiRequest.Data),
-                        Encoding.UTF8, "application/json");
+                    var content = new MultipartFormDataContent();
+
+                    foreach (var item in apiRequest.Data.GetType().GetProperties())
+                    {
+                        var value = item.GetValue(apiRequest.Data);
+                        if (value is FormFile)
+                        {
+                            var file = (FormFile)value;
+                            if (file != null)
+                            {
+                                content.Add(new StreamContent(file.OpenReadStream()), item.Name, file.FileName);
+                            }
+                        }
+                        else
+                        {
+                            content.Add(new StringContent(value == null ? "" : value.ToString()), item.Name);
+                        }
+                    }
+
+                    message.Content = content;  
+                }
+                else
+                {
+                    if (apiRequest.Data != null)
+                    {
+                        message.Content = new StringContent(JsonConvert.SerializeObject(apiRequest.Data),
+                            Encoding.UTF8, "application/json");
+                    }
                 }
 
                 message.Method = apiRequest.ApiType switch

@@ -38,7 +38,7 @@ namespace Villa_API.Controllers.V2
         }
 
         [HttpGet]
-        [ResponseCache(CacheProfileName = "Default30")]
+        //[ResponseCache(CacheProfileName = "Default30")]
         //[ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -123,7 +123,7 @@ namespace Villa_API.Controllers.V2
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<APIResponse>> CreateVillaAsync([FromBody] VillaCreateDTO villaCreateDTO)
+        public async Task<ActionResult<APIResponse>> CreateVillaAsync([FromForm] VillaCreateDTO villaCreateDTO)
         {
             try
             {
@@ -138,13 +138,40 @@ namespace Villa_API.Controllers.V2
                     return BadRequest(villaCreateDTO);
                 }
 
-                //if (villaDTO.Id > 0)
-                //{
-                //    return StatusCode(StatusCodes.Status500InternalServerError);
-                //}
-
                 Villa Villa = _mapper.Map<Villa>(villaCreateDTO);
                 await _villaRepository.CreateAsync(Villa);
+
+                if (villaCreateDTO.Image != null)
+                {
+                    string fileName = Villa.Id + Path.GetExtension(villaCreateDTO.Image.FileName);
+                    string filePath = @"wwwroot\villaImages\" + fileName;
+                    
+                    var directoryLocation = Path.Combine(Directory.GetCurrentDirectory(), filePath);
+
+                    //If you clone a repo and the file number does not exist then we will delete the image
+                    //However if you are building from scratch then this code will not execute.
+                    FileInfo file = new FileInfo(directoryLocation);
+                    if (file.Exists)
+                    {
+                        file.Delete();
+                    }
+
+                    using (var fileStream = new FileStream(directoryLocation, FileMode.Create))
+                    {
+                        villaCreateDTO.Image.CopyTo(fileStream);
+                    }
+
+                    var baseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host.Value}{HttpContext.Request.PathBase.Value}";
+                    Villa.ImageUrl = baseUrl + "/villaImages/" + fileName;
+                    Villa.ImageLocalPath = filePath;
+
+                }
+                else
+                {
+                    Villa.ImageUrl = Villa.ImageUrl;
+                }
+
+                await _villaRepository.UpdateAsync(Villa);
                 _response.Result = _mapper.Map<VillaDTO>(Villa);
                 _response.StatusCode = HttpStatusCode.Created;
                 return CreatedAtRoute("GetVillaByIdAsync", new { id = Villa.Id }, _response);
@@ -182,6 +209,16 @@ namespace Villa_API.Controllers.V2
                     return NotFound(_response);
                 }
 
+                if (!string.IsNullOrEmpty(villa.ImageLocalPath))
+                {
+                    var oldFilePathDirectory = Path.Combine(Directory.GetCurrentDirectory(), villa.ImageLocalPath);
+                    FileInfo file = new FileInfo(oldFilePathDirectory);
+                    if (file.Exists)
+                    {
+                        file.Delete();
+                    }
+                }
+
                 await _villaRepository.DeleteAsync(villa);
                 _response.StatusCode = HttpStatusCode.NoContent;
                 return Ok(_response);
@@ -203,7 +240,7 @@ namespace Villa_API.Controllers.V2
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<APIResponse>> UpdateVillaAsync(int id, [FromBody] VillaUpdateDTO villaUpdateDTO)
+        public async Task<ActionResult<APIResponse>> UpdateVillaAsync(int id, [FromForm] VillaUpdateDTO villaUpdateDTO)
         {
             try
             {
@@ -214,6 +251,40 @@ namespace Villa_API.Controllers.V2
                 }
 
                 Villa villa = _mapper.Map<Villa>(villaUpdateDTO);
+
+                if (villaUpdateDTO.Image != null)
+                {
+                    if (!string.IsNullOrEmpty(villa.ImageLocalPath))
+                    {
+                        var oldFilePathDirectory = Path.Combine(Directory.GetCurrentDirectory(), villa.ImageLocalPath);
+                        FileInfo file = new FileInfo(oldFilePathDirectory);
+                        if (file.Exists)
+                        {
+                            file.Delete();
+                        }
+                    }
+
+                    string fileName = villaUpdateDTO.Id + Path.GetExtension(villaUpdateDTO.Image.FileName);
+                    string filePath = @"wwwroot\villaImages\" + fileName;
+
+                    var directoryLocation = Path.Combine(Directory.GetCurrentDirectory(), filePath);
+
+
+                    using (var fileStream = new FileStream(directoryLocation, FileMode.Create))
+                    {
+                        villaUpdateDTO.Image.CopyTo(fileStream);
+                    }
+
+                    var baseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host.Value}{HttpContext.Request.PathBase.Value}";
+                    villa.ImageUrl = baseUrl + "/villaImages/" + fileName;
+                    villa.ImageLocalPath = filePath;
+
+                }
+                else
+                {
+                    villa.ImageUrl = villa.ImageUrl;
+                }
+
 
                 await _villaRepository.UpdateAsync(villa);
                 _response.StatusCode = HttpStatusCode.NoContent;

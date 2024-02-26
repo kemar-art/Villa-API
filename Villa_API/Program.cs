@@ -74,10 +74,10 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddControllers( options =>
 {
-    options.CacheProfiles.Add("Default30", new CacheProfile
-    {
-        Duration = 30
-    });
+    //options.CacheProfiles.Add("Default30", new CacheProfile
+    //{
+    //    Duration = 30
+    //});
     //option.ReturnHttpNotAcceptable = true;
 }).AddNewtonsoftJson().AddXmlDataContractSerializerFormatters();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -163,6 +163,8 @@ if (app.Environment.IsDevelopment())
         options.SwaggerEndpoint("/swagger/v1/swagger.json", "VillaAPI_V1");
     });
 }
+
+app.UseStaticFiles();
 
 app.UseHttpsRedirection();
 

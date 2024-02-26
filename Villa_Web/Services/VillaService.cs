@@ -25,7 +25,8 @@ namespace Villa_Web.Services
                 ApiType = StaticDetails.ApiType.POST,
                 Data = createDTO,
                 Url = villaUrl + $"/api/{StaticDetails.CurrentAPIVersion}/VillaAPI",
-                Token = token
+                Token = token,
+                ContentType = StaticDetails.ContentType.MultipartFormData
             });
         }
 
@@ -66,8 +67,9 @@ namespace Villa_Web.Services
                 ApiType = StaticDetails.ApiType.PUT,
                 Data = updateDTO,
                 Url = villaUrl + $"/api/{StaticDetails.CurrentAPIVersion}/VillaAPI/" + updateDTO.Id,
-                Token = token
-            }); ;
+                Token = token,
+                ContentType = StaticDetails.ContentType.MultipartFormData
+            });
         }
     }
 }
