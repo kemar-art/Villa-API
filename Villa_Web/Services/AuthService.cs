@@ -7,34 +7,36 @@ using Villa_Web.Services.IServices;
 
 namespace Villa_Web.Services
 {
-    public class AuthService : BaseService, IAuthService
+    public class AuthService :  IAuthService
     {
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IBaseService _baseService;
         private string villaUrl;
 
-        public AuthService(IHttpClientFactory httpClientFactory, IConfiguration configuration) : base(httpClientFactory)
+        public AuthService(IHttpClientFactory httpClientFactory, IConfiguration configuration, IBaseService baseService) 
         {
             _httpClientFactory = httpClientFactory;
+            _baseService = baseService;
             villaUrl = configuration.GetValue<string>("ServiceUrls:VillaAPI");
         }
-        public Task<T> LoginAsync<T>(LoginRequestDTO requestDTO)
+        public async Task<T> LoginAsync<T>(LoginRequestDTO requestDTO)
         {
-            return SendAsync<T>(new APIRequest()
+            return await _baseService.SendAsync<T>(new APIRequest()
             {
                 ApiType = StaticDetails.ApiType.POST,
                 Data = requestDTO,
                 Url = villaUrl + $"/api/{StaticDetails.CurrentAPIVersion}/UserAuth/login"
-            });
+            }, withBearer: false);
         }
 
-        public Task<T> RegisterAsync<T>(RegisterationRequestDTO requestDTO)
+        public async Task<T> RegisterAsync<T>(RegisterationRequestDTO requestDTO)
         {
-            return SendAsync<T>(new APIRequest()
+            return await _baseService.SendAsync<T>(new APIRequest()
             {
                 ApiType = StaticDetails.ApiType.POST,
                 Data = requestDTO,
                 Url = villaUrl + $"/api/{StaticDetails.CurrentAPIVersion}/UserAuth/register"
-            });
+            }, withBearer: false);
         }
     }
 }

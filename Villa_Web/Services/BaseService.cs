@@ -13,16 +13,18 @@ namespace Villa_Web.Services
     public class BaseService : IBaseService
     {
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly ITokenProvider _tokenProvider;
 
         public APIResponse responseModel { get; set; }
 
-        public BaseService(IHttpClientFactory httpClientFactory)
+        public BaseService(IHttpClientFactory httpClientFactory, ITokenProvider tokenProvider)
         {
             this.responseModel = new();
             _httpClientFactory = httpClientFactory;
+            _tokenProvider = tokenProvider;
         }
 
-        public async Task<T> SendAsync<T>(APIRequest apiRequest)
+        public async Task<T> SendAsync<T>(APIRequest apiRequest, bool withBearer = true)
         {
             try
             {
@@ -38,6 +40,12 @@ namespace Villa_Web.Services
                 }
                 
                 message.RequestUri = new Uri(apiRequest.Url);
+
+                if (withBearer && _tokenProvider.GetToken() != null)
+                {
+                    var mtToken = _tokenProvider.GetToken();
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", mtToken.AccessToken);
+                }
 
                 if (apiRequest.ContentType == StaticDetails.ContentType.MultipartFormData)
                 {

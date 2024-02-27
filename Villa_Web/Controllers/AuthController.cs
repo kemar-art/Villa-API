@@ -16,10 +16,12 @@ namespace Villa_Web.Controllers
     public class AuthController : Controller
     {
         private readonly IAuthService _authService;
+        private readonly ITokenProvider _tokenProvider;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, ITokenProvider tokenProvider)
         {
             _authService = authService;
+            _tokenProvider = tokenProvider;
         }
 
         [HttpGet]
@@ -40,7 +42,7 @@ namespace Villa_Web.Controllers
 
 
                 var handler = new JwtSecurityTokenHandler();
-                var jwt = handler.ReadJwtToken(model.Token);
+                var jwt = handler.ReadJwtToken(model.AccessToken);
 
                 var identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
                 identity.AddClaim(new Claim(ClaimTypes.Name, jwt.Claims.FirstOrDefault(u => u.Type == "unique_name").Value));
@@ -52,7 +54,7 @@ namespace Villa_Web.Controllers
 
 
 
-                HttpContext.Session.SetString(StaticDetails.AccessToken, model.Token);
+                _tokenProvider.SetToken(model);
                 return RedirectToAction("Index", "Home");
             }
             else
@@ -103,7 +105,7 @@ namespace Villa_Web.Controllers
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync();
-            HttpContext.Session.SetString(StaticDetails.AccessToken, "");
+            _tokenProvider.ClearToken();
             return RedirectToAction("Index", "Home");
         }
 
