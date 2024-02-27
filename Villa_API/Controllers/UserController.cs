@@ -23,8 +23,8 @@ namespace Villa_API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDTO model)
         {
-            var loginResponse = await _userRepository.Login(model);
-            if (loginResponse.User == null || string.IsNullOrEmpty(loginResponse.Token))
+            var tokenDto = await _userRepository.Login(model);
+            if (tokenDto == null || string.IsNullOrEmpty(tokenDto.Token))
             {
                 _response.StatusCode = HttpStatusCode.BadRequest;
                 _response.IsSuccess = false;
@@ -34,7 +34,7 @@ namespace Villa_API.Controllers
 
             _response.StatusCode = HttpStatusCode.OK;
             _response.IsSuccess = true;
-            _response.Result = loginResponse;
+            _response.Result = tokenDto;
             return Ok(_response);
         }
 

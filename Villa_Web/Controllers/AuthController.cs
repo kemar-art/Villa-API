@@ -36,7 +36,7 @@ namespace Villa_Web.Controllers
             APIResponse aPIResponse = await _authService.LoginAsync<APIResponse>(loginRequestDTO);
             if (aPIResponse != null && aPIResponse.IsSuccess)
             {
-                LoginResponseDTO model = JsonConvert.DeserializeObject<LoginResponseDTO>(Convert.ToString(aPIResponse.Result));
+                TokenDTO model = JsonConvert.DeserializeObject<TokenDTO>(Convert.ToString(aPIResponse.Result));
 
 
                 var handler = new JwtSecurityTokenHandler();
@@ -52,7 +52,7 @@ namespace Villa_Web.Controllers
 
 
 
-                HttpContext.Session.SetString(StaticDetails.SessionToken, model.Token);
+                HttpContext.Session.SetString(StaticDetails.AccessToken, model.Token);
                 return RedirectToAction("Index", "Home");
             }
             else
@@ -103,7 +103,7 @@ namespace Villa_Web.Controllers
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync();
-            HttpContext.Session.SetString(StaticDetails.SessionToken, "");
+            HttpContext.Session.SetString(StaticDetails.AccessToken, "");
             return RedirectToAction("Index", "Home");
         }
 
