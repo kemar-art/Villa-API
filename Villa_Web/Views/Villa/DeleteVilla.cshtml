@@ -35,7 +35,9 @@
                 <label asp-for="ImageUrl" class="control-label pt-2"></label>
             </div>
             <div class="col-10 pb-3">
-                <input asp-for="ImageUrl" disabled class="form-control" />
+                <input asp-for="Image" disabled class="form-control" />
+                <input asp-for="ImageUrl" hidden class="form-control" />
+                <input asp-for="ImageLocalPath" hidden class="form-control" />
             </div>
 
             <div class="col-2">
