@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using Villa_API.Models;
 using Villa_API.Models.Dto;
+using Villa_API.Repository;
 using Villa_API.Repository.IRepository;
 
 namespace Villa_API.Controllers
@@ -63,5 +64,48 @@ namespace Villa_API.Controllers
             _response.IsSuccess = true;
             return Ok(_response);
         }
+
+        [HttpPost("refresh")]
+        public async Task<IActionResult> GetNewTokenFromRefreshToken([FromBody] TokenDTO tokenDTO)
+        {
+            if (ModelState.IsValid)
+            {
+                var tokenDTOResponse = await _userRepository.RefreshAccessToken(tokenDTO);
+                if (tokenDTOResponse == null || string.IsNullOrEmpty(tokenDTOResponse.AccessToken))
+                {
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.IsSuccess = false;
+                    _response.ErrorsMessages.Add("Invalid Token");
+                    return BadRequest(_response);
+                }
+
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.IsSuccess = true;
+                _response.Result = tokenDTOResponse;
+                return Ok(_response);
+            }
+            else
+            {
+                _response.IsSuccess = false;
+                _response.ErrorsMessages.Add("Invalid Input");
+                return BadRequest(_response);
+            }
+            
+        }
     }
 }
+//bool ifUserNameIsUnique = _userRepository.IsUniqueUser(model.UserName);
+
+
+//var user = await _userRepository.Register(model);
+//if (user == null)
+//{
+//    _response.StatusCode = HttpStatusCode.BadRequest;
+//    _response.IsSuccess = false;
+//    _response.ErrorsMessages.Add("Error while registering");
+//    return BadRequest(_response);
+//}
+
+//_response.StatusCode = HttpStatusCode.OK;
+//_response.IsSuccess = true;
+//return Ok(_response);

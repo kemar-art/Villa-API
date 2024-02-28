@@ -15,6 +15,7 @@ namespace Villa_Web.Services
         public void ClearToken()
         {
             _httpContextAccessor.HttpContext?.Response.Cookies.Delete(StaticDetails.AccessToken);
+            _httpContextAccessor.HttpContext?.Response.Cookies.Delete(StaticDetails.RefreshToken);
         }
 
         public TokenDTO GetToken()
@@ -22,9 +23,11 @@ namespace Villa_Web.Services
             try
             {
                 bool myAccessToken = _httpContextAccessor.HttpContext.Request.Cookies.TryGetValue(StaticDetails.AccessToken, out string token);
+                bool myRefreshToken = _httpContextAccessor.HttpContext.Request.Cookies.TryGetValue(StaticDetails.RefreshToken, out string refreshtoken);
                 TokenDTO tokenDTO = new()
                 {
                     AccessToken = token,
+                    RefreshToken = refreshtoken,
                 };
 
                 return myAccessToken ? tokenDTO : null;
@@ -40,6 +43,7 @@ namespace Villa_Web.Services
         {
             var cookieOptios = new CookieOptions { Expires = DateTime.UtcNow.AddDays(60) };
             _httpContextAccessor.HttpContext?.Response.Cookies.Append(StaticDetails.AccessToken, tokenDTO.AccessToken, cookieOptios);
+            _httpContextAccessor.HttpContext?.Response.Cookies.Append(StaticDetails.RefreshToken, tokenDTO.RefreshToken, cookieOptios);
         }
     }
 }
