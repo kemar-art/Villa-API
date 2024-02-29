@@ -29,79 +29,85 @@ namespace Villa_Web.Services
             try
             {
                 var client = _httpClientFactory.CreateClient("VillaAPI");
-                HttpRequestMessage message = new();
-                if (apiRequest.ContentType == StaticDetails.ContentType.MultipartFormData)
-                {
-                    message.Headers.Add("Accept", "*/*");
-                }
-                else
-                {
-                    message.Headers.Add("Accept", "application/json");
-                }
-                
-                message.RequestUri = new Uri(apiRequest.Url);
 
-                if (withBearer && _tokenProvider.GetToken() != null)
+                var messageFactory = () =>
                 {
-                    var mtToken = _tokenProvider.GetToken();
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", mtToken.AccessToken);
-                }
-
-                if (apiRequest.ContentType == StaticDetails.ContentType.MultipartFormData)
-                {
-                    var content = new MultipartFormDataContent();
-
-                    foreach (var item in apiRequest.Data.GetType().GetProperties())
+                    HttpRequestMessage message = new();
+                    if (apiRequest.ContentType == StaticDetails.ContentType.MultipartFormData)
                     {
-                        var value = item.GetValue(apiRequest.Data);
-                        if (value is FormFile)
+                        message.Headers.Add("Accept", "*/*");
+                    }
+                    else
+                    {
+                        message.Headers.Add("Accept", "application/json");
+                    }
+
+                    message.RequestUri = new Uri(apiRequest.Url);
+
+                    if (withBearer && _tokenProvider.GetToken() != null)
+                    {
+                        var mtToken = _tokenProvider.GetToken();
+                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", mtToken.AccessToken);
+                    }
+
+                    if (apiRequest.ContentType == StaticDetails.ContentType.MultipartFormData)
+                    {
+                        var content = new MultipartFormDataContent();
+
+                        foreach (var item in apiRequest.Data.GetType().GetProperties())
                         {
-                            var file = (FormFile)value;
-                            if (file != null)
+                            var value = item.GetValue(apiRequest.Data);
+                            if (value is FormFile)
                             {
-                                content.Add(new StreamContent(file.OpenReadStream()), item.Name, file.FileName);
+                                var file = (FormFile)value;
+                                if (file != null)
+                                {
+                                    content.Add(new StreamContent(file.OpenReadStream()), item.Name, file.FileName);
+                                }
+                            }
+                            else
+                            {
+                                content.Add(new StringContent(value == null ? "" : value.ToString()), item.Name);
                             }
                         }
-                        else
+
+                        message.Content = content;
+                    }
+                    else
+                    {
+                        if (apiRequest.Data != null)
                         {
-                            content.Add(new StringContent(value == null ? "" : value.ToString()), item.Name);
+                            message.Content = new StringContent(JsonConvert.SerializeObject(apiRequest.Data),
+                                Encoding.UTF8, "application/json");
                         }
                     }
 
-                    message.Content = content;  
-                }
-                else
-                {
-                    if (apiRequest.Data != null)
+                    message.Method = apiRequest.ApiType switch
                     {
-                        message.Content = new StringContent(JsonConvert.SerializeObject(apiRequest.Data),
-                            Encoding.UTF8, "application/json");
-                    }
-                }
+                        StaticDetails.ApiType.POST => HttpMethod.Post,
+                        StaticDetails.ApiType.PUT => HttpMethod.Put,
+                        StaticDetails.ApiType.DELETE => HttpMethod.Delete,
+                        _ => HttpMethod.Get,
+                    };
 
-                message.Method = apiRequest.ApiType switch
-                {
-                    StaticDetails.ApiType.POST => HttpMethod.Post,
-                    StaticDetails.ApiType.PUT => HttpMethod.Put,
-                    StaticDetails.ApiType.DELETE => HttpMethod.Delete,
-                    _ => HttpMethod.Get,
+                    //switch (apiRequest.ApiType)
+                    //{
+                    //    case StaticDetails.ApiType.POST:
+                    //        message.Method = HttpMethod.Post;
+                    //        break;
+                    //    case StaticDetails.ApiType.PUT:
+                    //        message.Method = HttpMethod.Put;
+                    //        break;
+                    //    case StaticDetails.ApiType.DELETE:
+                    //        message.Method = HttpMethod.Delete;
+                    //        break;
+                    //    default:
+                    //        message.Method = HttpMethod.Get;
+                    //        break;
+                    //}
+
+                    return message;
                 };
-
-                //switch (apiRequest.ApiType)
-                //{
-                //    case StaticDetails.ApiType.POST:
-                //        message.Method = HttpMethod.Post;
-                //        break;
-                //    case StaticDetails.ApiType.PUT:
-                //        message.Method = HttpMethod.Put;
-                //        break;
-                //    case StaticDetails.ApiType.DELETE:
-                //        message.Method = HttpMethod.Delete;
-                //        break;
-                //    default:
-                //        message.Method = HttpMethod.Get;
-                //        break;
-                //}
 
                 HttpResponseMessage apiResponse = null;
 
@@ -111,7 +117,7 @@ namespace Villa_Web.Services
                 }
 
 
-                apiResponse = await client.SendAsync(message);
+                apiResponse = await client.SendAsync(messageFactory());
 
                 var apiContent = await apiResponse.Content.ReadAsStringAsync();
                 try
