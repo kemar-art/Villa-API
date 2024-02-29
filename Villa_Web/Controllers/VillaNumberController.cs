@@ -62,6 +62,7 @@ namespace Villa_Web.Controllers
         {
             if (ModelState.IsValid)
             {
+
                 var response = await _villaNumberService.CreateAsync<APIResponse>(model.VillaNumber);
                 if (response != null && response.IsSuccess)
                 {
@@ -69,22 +70,20 @@ namespace Villa_Web.Controllers
                 }
                 else
                 {
-                    if (response.ErrorsMessages.Count > 0)
-                    {
-                        ModelState.AddModelError("ErrorMessages", response.ErrorsMessages.FirstOrDefault());
-                    }
+                    TempData["error"] = (response.ErrorsMessages != null && response.ErrorsMessages.Count > 0) ?
+                        response.ErrorsMessages[0] : "Error Encountered";
                 }
             }
 
-
             var resp = await _villaService.GetAllAsync<APIResponse>();
-            if (resp != null && resp.IsSuccess /*&& response.ErrorsMessages.Count == 0*/)
+            if (resp != null && resp.IsSuccess)
             {
-                model.VillaSelectList = JsonConvert.DeserializeObject<List<VillaDTO>>(Convert.ToString(resp.Result)).Select(x => new SelectListItem
-                {
-                    Text = x.Name,
-                    Value = x.Id.ToString(),
-                });
+                model.VillaSelectList = JsonConvert.DeserializeObject<List<VillaDTO>>
+                    (Convert.ToString(resp.Result)).Select(i => new SelectListItem
+                    {
+                        Text = i.Name,
+                        Value = i.Id.ToString()
+                    }); ;
             }
             return View(model);
         }
@@ -112,7 +111,12 @@ namespace Villa_Web.Controllers
 
                 return View(villaNumberUpdateVM);
             }
-           
+            else
+            {
+                TempData["error"] = (response.ErrorsMessages != null && response.ErrorsMessages.Count > 0) ?
+                    response.ErrorsMessages[0] : "Error Encountered";
+            }
+
 
             return NotFound();
         }
@@ -131,10 +135,8 @@ namespace Villa_Web.Controllers
                 }
                 else
                 {
-                    if (response.ErrorsMessages.Count > 0)
-                    {
-                        ModelState.AddModelError("ErrorMessages", response.ErrorsMessages.FirstOrDefault());
-                    }
+                    TempData["error"] = (response.ErrorsMessages != null && response.ErrorsMessages.Count > 0) ?
+                        response.ErrorsMessages[0] : "Error Encountered";
                 }
             }
 
@@ -186,6 +188,11 @@ namespace Villa_Web.Controllers
             if (response != null && response.IsSuccess)
             {
                 return RedirectToAction(nameof(IndexVillaNumber));
+            }
+            else
+            {
+                TempData["error"] = (response.ErrorsMessages != null && response.ErrorsMessages.Count > 0) ?
+                    response.ErrorsMessages[0] : "Error Encountered";
             }
 
             return View(model);

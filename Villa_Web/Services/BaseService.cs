@@ -7,6 +7,13 @@ using Newtonsoft.Json;
 using Villa_Utility;
 using Villa_Web.Models;
 using Villa_Web.Services.IServices;
+using Villa_Web.Models.Dto;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Net;
+using System;
 
 namespace Villa_Web.Services
 {
@@ -14,14 +21,18 @@ namespace Villa_Web.Services
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ITokenProvider _tokenProvider;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        protected readonly string VillaApiUrl;
 
         public APIResponse responseModel { get; set; }
 
-        public BaseService(IHttpClientFactory httpClientFactory, ITokenProvider tokenProvider)
+        public BaseService(IHttpClientFactory httpClientFactory, ITokenProvider tokenProvider, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
         {
             this.responseModel = new();
             _httpClientFactory = httpClientFactory;
             _tokenProvider = tokenProvider;
+            _httpContextAccessor = httpContextAccessor;
+            VillaApiUrl = configuration.GetValue<string>("ServiceUrls:VillaAPI");
         }
 
         public async Task<T> SendAsync<T>(APIRequest apiRequest, bool withBearer = true)
@@ -44,11 +55,7 @@ namespace Villa_Web.Services
 
                     message.RequestUri = new Uri(apiRequest.Url);
 
-                    if (withBearer && _tokenProvider.GetToken() != null)
-                    {
-                        var mtToken = _tokenProvider.GetToken();
-                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", mtToken.AccessToken);
-                    }
+                    
 
                     if (apiRequest.ContentType == StaticDetails.ContentType.MultipartFormData)
                     {
@@ -109,38 +116,57 @@ namespace Villa_Web.Services
                     return message;
                 };
 
-                HttpResponseMessage apiResponse = null;
+                HttpResponseMessage httpResponseMessage = null;
 
-                if (!string.IsNullOrEmpty(apiRequest.Token))
+                //if (!string.IsNullOrEmpty(apiRequest.Token))
+                //{
+                //    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiRequest.Token);
+                //}
+
+
+                httpResponseMessage = await SendWithRefreshTokenAsync(client, messageFactory, withBearer);
+
+
+                APIResponse FinalApiResponse = new()
                 {
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiRequest.Token);
-                }
+                    IsSuccess = false
+                };
 
 
-                apiResponse = await client.SendAsync(messageFactory());
 
-                var apiContent = await apiResponse.Content.ReadAsStringAsync();
+
+                //var apiContent = await httpResponseMessage.Content.ReadAsStringAsync();
                 try
                 {
-                    APIResponse APIResponse = JsonConvert.DeserializeObject<APIResponse>(apiContent);
-                    if (APIResponse != null && (apiResponse.StatusCode == System.Net.HttpStatusCode.BadRequest || apiResponse.StatusCode == System.Net.HttpStatusCode.NotFound))
+                    switch (httpResponseMessage.StatusCode)
                     {
-                        APIResponse.StatusCode = System.Net.HttpStatusCode.BadRequest;
-                        APIResponse.IsSuccess = false;
-                        var res = JsonConvert.SerializeObject(APIResponse);
-                        var returnObj = JsonConvert.DeserializeObject<T>(res);
-                        return returnObj;
+                        case HttpStatusCode.NotFound:
+                            FinalApiResponse.ErrorsMessages = new List<string>() { "Not Found" };
+                            break;
+                        case HttpStatusCode.Forbidden:
+                            FinalApiResponse.ErrorsMessages = new List<string>() { "Access Denied" };
+                            break;
+                        case HttpStatusCode.Unauthorized:
+                            FinalApiResponse.ErrorsMessages = new List<string>() { "Unauthorized" };
+                            break;
+                        case HttpStatusCode.InternalServerError:
+                            FinalApiResponse.ErrorsMessages = new List<string>() { "Internal Server Error" };
+                            break;
+                        default:
+                            var apiContent = await httpResponseMessage.Content.ReadAsStringAsync();
+                            FinalApiResponse.IsSuccess = true;
+                            FinalApiResponse = JsonConvert.DeserializeObject<APIResponse>(apiContent);
+                            break;
                     }
                 }
                 catch (Exception ex)
                 {
 
-                    var APIResponse = JsonConvert.DeserializeObject<T>(apiContent);
-                    return APIResponse;
+                    FinalApiResponse.ErrorsMessages = ["Error Encountered", ex.Message.ToString()];
                 }
-
-                var exception = JsonConvert.DeserializeObject<T>(apiContent);
-                return exception;
+                var res = JsonConvert.SerializeObject(FinalApiResponse);
+                var returnObj = JsonConvert.DeserializeObject<T>(res);
+                return returnObj;
             }
             catch (Exception ex)
             {
@@ -156,5 +182,101 @@ namespace Villa_Web.Services
             }
         }
 
+        private async Task<HttpResponseMessage> SendWithRefreshTokenAsync(HttpClient httpClient, Func<HttpRequestMessage> httpRequestMessageFactory, bool withBearer = true)
+        {
+            if (!withBearer)
+            {
+                return await httpClient.SendAsync(httpRequestMessageFactory());
+            }
+            else
+            {
+                TokenDTO tokenDTO = _tokenProvider.GetToken();
+                if (tokenDTO != null && !string.IsNullOrEmpty(tokenDTO.AccessToken))
+                {
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tokenDTO.AccessToken);
+                }
+
+                try
+                {
+                    var response = await httpClient.SendAsync(httpRequestMessageFactory());
+                    if (response.IsSuccessStatusCode)
+                    {
+                        return response;
+                    }
+
+                    if (!response.IsSuccessStatusCode && response.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        //GENERATE NEW Token from Refresh token / Sign in with that new token and then retry
+                        await InvokeRefreshTokenEndpoint(httpClient, tokenDTO.AccessToken, tokenDTO.RefreshToken);
+                        response = await httpClient.SendAsync(httpRequestMessageFactory());
+                        return response;
+                    }
+                    return response;
+
+
+                }
+                catch (HttpRequestException httpRequestException)
+                {
+                    if (httpRequestException.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                    {
+                        // refresh token and retry the request
+                        await InvokeRefreshTokenEndpoint(httpClient, tokenDTO.AccessToken, tokenDTO.RefreshToken);
+                        return await httpClient.SendAsync(httpRequestMessageFactory());
+                    }
+                    throw;
+                }
+            }
+            
+        }
+
+        private async Task InvokeRefreshTokenEndpoint(HttpClient httpClient, string existingAccessToken, string existingRefreshToken)
+        {
+            HttpRequestMessage message = new();
+            message.Headers.Add("Accept", "application/json");
+            message.RequestUri = new Uri($"{VillaApiUrl}/api/{StaticDetails.CurrentAPIVersion}/UsersAuth/refresh");
+            message.Method = HttpMethod.Post;
+            message.Content = new StringContent(JsonConvert.SerializeObject(new TokenDTO()
+            {
+                AccessToken = existingAccessToken,
+                RefreshToken = existingRefreshToken
+            }), Encoding.UTF8, "application/json");
+
+            var response = await httpClient.SendAsync(message);
+            var content = await response.Content.ReadAsStringAsync();
+            var apiResponse = JsonConvert.DeserializeObject<APIResponse>(content);
+
+            if (apiResponse?.IsSuccess != true)
+            {
+                await _httpContextAccessor.HttpContext.SignOutAsync();
+                _tokenProvider.ClearToken();
+                //throw new AuthException();
+            }
+            else
+            {
+                var tokenDataStr = JsonConvert.SerializeObject(apiResponse.Result);
+                var tokenDto = JsonConvert.DeserializeObject<TokenDTO>(tokenDataStr);
+
+                if (tokenDto != null && !string.IsNullOrEmpty(tokenDto.AccessToken))
+                {
+                    //New method to sign in with the new token that we receive
+                    await SignInWithNewTokens(tokenDto);
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tokenDto.AccessToken);
+                }
+            }
+        }
+
+        private async Task SignInWithNewTokens(TokenDTO tokenDTO)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jwt = handler.ReadJwtToken(tokenDTO.AccessToken);
+
+            var identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
+            identity.AddClaim(new Claim(ClaimTypes.Name, jwt.Claims.FirstOrDefault(u => u.Type == "unique_name").Value));
+            identity.AddClaim(new Claim(ClaimTypes.Role, jwt.Claims.FirstOrDefault(u => u.Type == "role").Value));
+            var principal = new ClaimsPrincipal(identity);
+            await _httpContextAccessor.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+            _tokenProvider.SetToken(tokenDTO);
+        }
     }
 }
