@@ -1,12 +1,13 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Villa_Web;
+using Villa_Web.Extension;
 using Villa_Web.Services;
 using Villa_Web.Services.IServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(x => x.Filters.Add(new AuthExceptionRedirection()));
 
 builder.Services.AddAutoMapper(typeof(MapConfig));
 

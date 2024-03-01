@@ -14,6 +14,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Net;
 using System;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
 namespace Villa_Web.Services
 {
@@ -22,6 +23,7 @@ namespace Villa_Web.Services
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ITokenProvider _tokenProvider;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ITempDataDictionary TempData;
         protected readonly string VillaApiUrl;
 
         public APIResponse responseModel { get; set; }
@@ -33,6 +35,7 @@ namespace Villa_Web.Services
             _tokenProvider = tokenProvider;
             _httpContextAccessor = httpContextAccessor;
             VillaApiUrl = configuration.GetValue<string>("ServiceUrls:VillaAPI");
+            
         }
 
         public async Task<T> SendAsync<T>(APIRequest apiRequest, bool withBearer = true)
@@ -168,6 +171,10 @@ namespace Villa_Web.Services
                 var returnObj = JsonConvert.DeserializeObject<T>(res);
                 return returnObj;
             }
+            catch(AuthException) 
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 var dto = new APIResponse
@@ -215,6 +222,10 @@ namespace Villa_Web.Services
 
 
                 }
+                catch(AuthException)
+                {
+                    throw;
+                }
                 catch (HttpRequestException httpRequestException)
                 {
                     if (httpRequestException.StatusCode == System.Net.HttpStatusCode.Unauthorized)
@@ -249,7 +260,7 @@ namespace Villa_Web.Services
             {
                 await _httpContextAccessor.HttpContext.SignOutAsync();
                 _tokenProvider.ClearToken();
-                //throw new AuthException();
+                throw new AuthException();
             }
             else
             {
