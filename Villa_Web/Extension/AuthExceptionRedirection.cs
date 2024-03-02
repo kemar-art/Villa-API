@@ -10,7 +10,6 @@ namespace Villa_Web.Extension
         {
             if (context.Exception is AuthException) 
             {
-                TempData["error"] = "Inactive Session";
                 context.Result = new RedirectToActionResult("Login", "Auth", null);
             }
         }
