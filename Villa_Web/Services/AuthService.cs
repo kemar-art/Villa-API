@@ -29,6 +29,16 @@ namespace Villa_Web.Services
             }, withBearer: false);
         }
 
+        public async Task<T> LogoutAsync<T>(TokenDTO obj)
+        {
+            return await _baseService.SendAsync<T>(new APIRequest()
+            {
+                ApiType = StaticDetails.ApiType.POST,
+                Data = obj,
+                Url = villaUrl + $"/api/{StaticDetails.CurrentAPIVersion}/UserAuth/revoke"
+            });
+        }
+
         public async Task<T> RegisterAsync<T>(RegisterationRequestDTO requestDTO)
         {
             return await _baseService.SendAsync<T>(new APIRequest()
